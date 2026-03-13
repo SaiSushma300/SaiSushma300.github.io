@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV to Tenant Format</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input[type="file"] { margin-bottom: 10px; }
+        #output { white-space: pre-wrap; background: #f4f4f4; padding: 10px; border: 1px solid #ccc; margin-top: 10px; }
+        button { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Upload CSV to Format Tenants</h2>
+    <input type="file" id="csvFile" accept=".csv" />
+    <button onclick="processCSV()">Convert</button>
+    <button onclick="copyToClipboard()">Copy to Clipboard</button>
+    <h3>Formatted Output:</h3>
+    <div id="output"></div>
+
+    <script>
+        let formattedData = "";
+
+        function processCSV() {
+            const fileInput = document.getElementById('csvFile').files[0];
+            if (!fileInput) {
+                alert("Please upload a CSV file first.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const rows = text.split(/\r?\n/).filter(row => row.trim() !== "");
+                
+                // Remove header if present
+                if (rows[0].toLowerCase().includes("tenant")) {
+                    rows.shift();
+                }
+
+                formattedData = rows.map(item => `'${item.trim()}'`).join(",");
+                const count = rows.length;
+
+                document.getElementById('output').textContent = formattedData + "\n\nTotal Count: " + count;
+            };
+            reader.readAsText(fileInput);
+        }
+
+        function copyToClipboard() {
+            if (!formattedData) {
+                alert("Please convert the CSV first.");
+                return;
+            }
+            navigator.clipboard.writeText(formattedData)
+                .then(() => alert("Formatted data copied to clipboard!"))
+                .catch(err => alert("Failed to copy: " + err));
+        }
+    </script>
+</body>
+</html>
